@@ -7,9 +7,9 @@ new_constructor <- function(parent, properties,
   if (identical(parent, S7_object) || (is_class(parent) && parent@abstract)) {
     new_object_call <-
       if (has_S7_symbols(envir, "new_object", "S7_object")) {
-        bquote(new_object(S7_object(), ..(self_args)), splice = TRUE)
+        bquote(new_object(S7_object, ..(self_args)), splice = TRUE)
       } else {
-        bquote(S7::new_object(S7::S7_object(), ..(self_args)), splice = TRUE)
+        bquote(S7::new_object(S7::S7_object, ..(self_args)), splice = TRUE)
       }
 
     return(new_function(
@@ -24,24 +24,6 @@ new_constructor <- function(parent, properties,
     ))
   }
 
-  if (is_class(parent)) {
-    parent_name <- parent@name
-    parent_fun <- parent
-    args <- modify_list(arg_info$parent, arg_info$self)
-  } else if (is_base_class(parent)) {
-    parent_name <- parent$constructor_name
-    parent_fun <- parent$constructor
-    args <- modify_list(arg_info$parent, arg_info$self)
-  } else if (is_S3_class(parent)) {
-    parent_name <- paste0("new_", parent$class[[1]])
-    parent_fun <- parent$constructor
-    args <- formals(parent$constructor)
-    args[names(arg_info$self)] <- arg_info$self
-  } else {
-    # user facing error in S7_class()
-    stop("Unsupported `parent` type", call. = FALSE)
-  }
-
   # ensure default value for `...` is empty
   if ("..." %in% names(args)) {
     args[names(args) == "..."] <- list(quote(expr = ))
@@ -49,11 +31,35 @@ new_constructor <- function(parent, properties,
 
   parent_args <- as_names(names(arg_info$parent), named = TRUE)
   names(parent_args)[names(parent_args) == "..."] <- ""
-  parent_call <- new_call(parent_name, parent_args)
-  body <- new_call(
-    if (has_S7_symbols(envir, "new_object")) "new_object" else c("S7", "new_object"),
-    c(parent_call, self_args)
-  )
+
+  obj_call <- if (has_S7_symbols(envir, "new_object")) {
+    "new_object"
+  } else {
+    c("S7", "new_object")
+  }
+
+  if (is_class(parent)) {
+    parent_name <- parent@name
+    parent_fun <- parent
+    args <- modify_list(arg_info$parent, arg_info$self)
+    body <- new_call(obj_call, c(as.symbol(parent_name), parent_args, self_args))
+  } else if (is_base_class(parent)) {
+    parent_name <- parent$constructor_name
+    parent_fun <- parent$constructor
+    args <- modify_list(arg_info$parent, arg_info$self)
+    parent_call <- new_call(parent_name, parent_args)
+    body <- new_call(obj_call, c(parent_call, self_args))
+  } else if (is_S3_class(parent)) {
+    parent_name <- paste0("new_", parent$class[[1]])
+    parent_fun <- parent$constructor
+    args <- formals(parent$constructor)
+    args[names(arg_info$self)] <- arg_info$self
+    parent_call <- new_call(parent_name, parent_args)
+    body <- new_call(obj_call, c(parent_call, self_args))
+  } else {
+    # user facing error in S7_class()
+    stop("Unsupported `parent` type", call. = FALSE)
+  }
 
   env <- new.env(parent = envir)
   env[[parent_name]] <- parent_fun

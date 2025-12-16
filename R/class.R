@@ -254,32 +254,48 @@ new_object <- function(.parent, ...) {
 
   # force .parent before ...
   # TODO: Some type checking on `.parent`?
-  object <- .parent
+  if (is_class(.parent)) {
+    object <- S7_object()
+    properties <- .parent@properties
+  } else {
+    object <- .parent
+    properties <- list()
+  }
+
+  properties <- modify_list(properties, class@properties)
+  prop_has_setter <- vlapply(properties, prop_has_setter)
+
+  if (!pkgload::is_loading()) browser()
 
   args <- list(...)
   if ("" %in% names2(args)) {
     stop("All arguments to `...` must be named")
   }
 
-  has_setter <- vlapply(class@properties[names(args)], prop_has_setter)
+  # instantiate with any arguments that map to properties directly
+  prop_args <- args[names(properties)]
+  prop_args_with_setter <- prop_args[prop_has_setter]
+  prop_args_without_setter <- prop_args[!prop_has_setter]
+  prop_args_no_setter <- Filter(Negate(is.null), prop_args_without_setter)
 
   attrs <- c(
     list(class = class_dispatch(class), S7_class = class),
-    args[!has_setter],
+    prop_args_no_setter,
     attributes(object)
   )
+
   attrs <- attrs[!duplicated(names(attrs))]
   attributes(object) <- attrs
 
   # invoke custom property setters
-  prop_setter_vals <- args[has_setter]
-  for (name in names(prop_setter_vals))
-    prop(object, name, check = FALSE) <- prop_setter_vals[[name]]
+  for (name in names(prop_args_with_setter)) {
+    prop(object, name, check = FALSE) <- prop_args_with_setter[[name]]
+  }
 
   # Don't need to validate if parent class already validated,
   # i.e. it's a non-abstract S7 class
-  parent_validated <- inherits(class@parent, "S7_object") && !class@parent@abstract
-  validate(object, recursive = !parent_validated)
+  # parent_validated <- inherits(class@parent, "S7_object") && !class@parent@abstract
+  validate(object)
 
   object
 }
