@@ -90,7 +90,15 @@ test_that("can use `...` in parent constructor", {
   )
 
   # And check that arguments matched correctly
-  bar <- new_class("bar", foo, properties = list(y = class_double))
+  bar <- new_class(
+    "bar",
+    foo,
+    properties = list(y = class_double),
+    constructor = function(..., y = double()) {
+      new_object(x = list(...), y = y)
+    }
+  )
+
   expect_equal(bar()@x, list())
   expect_equal(bar(2)@x, list(2))
   expect_equal(bar(y = 2)@x, list())

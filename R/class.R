@@ -268,14 +268,15 @@ is_class <- function(x) inherits(x, "S7_class")
 #' @rdname new_class
 #' @export
 new_object <- function(...) {
-  args <- list(...)
-  arg_names <- names2(args)
-
   class <- sys.function(-1)
+
+  args <- list(...)
+  names(args) <- names2(args)
 
   if (!inherits(class, "S7_class")) {
     stop("`new_object()` must be called from within a constructor")
   }
+
   if (class@abstract) {
     msg <- sprintf(
       "Can't construct an object from abstract class <%s>",
@@ -284,12 +285,8 @@ new_object <- function(...) {
     stop(msg)
   }
 
-  # force .parent before ...
-  # TODO: Some type checking on `.parent`?
-  object <- S7_object()
-  class_lineage <- S7_class_lineage(class)
-
   # instantiate with most recent custom constructor
+  class_lineage <- S7_class_lineage(class)
   idx <- Position(
     Negate(uses_default_constructor),
     # ignore current class constructor
@@ -301,9 +298,9 @@ new_object <- function(...) {
   idx <- idx + 1L
 
   constructor <- class_constructor(class_lineage[[idx]])
-  cons_named_arg <- arg_names %in% formalArgs(constructor)
+  cons_named_arg <- names(args) %in% formalArgs(constructor)
   cons_accepts_ellipses <- "..." %in% formalArgs(constructor)
-  cons_unnamed_arg <- cons_accepts_ellipses & "" == arg_names
+  cons_unnamed_arg <- cons_accepts_ellipses & "" == names(args)
   cons_args <- args[cons_named_arg | cons_unnamed_arg]
   object <- do.call(constructor, cons_args, quote = TRUE)
   attr(object, "S7_class") <- class_lineage[[idx]]
@@ -318,7 +315,7 @@ new_object <- function(...) {
     attr(object, "S7_class") <- class_i
 
     # apply properties
-    prop_names <- intersect(arg_names, names(class_i@properties))
+    prop_names <- intersect(names(args), names(class_i@properties))
     if (S7_inherits(object)) {
       props(object, check = FALSE) <- args[prop_names]
     } else {
