@@ -263,8 +263,7 @@ is_class <- function(x) inherits(x, "S7_class")
 
 # Object ------------------------------------------------------------------
 
-#' @param .parent,... Parent object and named properties used to construct the
-#'   object.
+#' @param ... Named properties used to construct the object.
 #' @rdname new_class
 #' @export
 new_object <- function(...) {
@@ -298,8 +297,8 @@ new_object <- function(...) {
   idx <- idx + 1L
 
   constructor <- class_constructor(class_lineage[[idx]])
-  cons_named_arg <- names(args) %in% formalArgs(constructor)
-  cons_accepts_ellipses <- "..." %in% formalArgs(constructor)
+  cons_named_arg <- names(args) %in% names(formals(constructor))
+  cons_accepts_ellipses <- "..." %in% names(formals(constructor))
   cons_unnamed_arg <- cons_accepts_ellipses & "" == names(args)
   cons_args <- args[cons_named_arg | cons_unnamed_arg]
   object <- do.call(constructor, cons_args, quote = TRUE)
