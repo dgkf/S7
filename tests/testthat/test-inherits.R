@@ -21,3 +21,41 @@ test_that("throws informative error", {
   })
   expect_snapshot(check_is_S7("a"), error = TRUE)
 })
+
+test_that("throws informative error", {
+  parent <- new_class(
+    "parent",
+    properties = list(
+      "x" = class_integer,
+      "y" = new_property(
+        class_any,
+        setter = function(self, value) {
+          self@y <- paste("parent", format(value))
+          self
+        }
+      )
+    )
+  )
+
+  child <- new_class(
+    "child",
+    parent = parent,
+    properties = list(
+      "y" = new_property(
+        class_double,
+        default = 10,
+        setter = function(self, value) {
+          self@y <- value * 2
+          self
+        }
+      )
+    )
+  )
+
+  expect_snapshot(error = TRUE, {
+    foo1 <- new_class("foo1", package = NULL)
+    foo2 <- new_class("foo2", package = NULL)
+    check_is_S7(foo1(), foo2)
+  })
+  expect_snapshot(check_is_S7("a"), error = TRUE)
+})

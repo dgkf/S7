@@ -2,7 +2,11 @@ describe("S7 classes", {
   it("possess expected properties", {
     foo <- new_class("foo", package = "S7", validator = function(self) NULL)
 
-    expect_equal(prop_names(foo), setdiff(names(attributes(foo)), "class"))
+    expect_equal(
+      prop_names(foo),
+      setdiff(names(attributes(foo)), c("class", ".constructor_is_default"))
+    )
+
     expect_type(foo@name, "character")
     expect_equal(foo@parent, S7_object)
     expect_type(foo@constructor, "closure")

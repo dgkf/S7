@@ -165,11 +165,11 @@
     Code
       . <- B()
     Output
-      A B 
+      B A 
     Code
       . <- C()
     Output
-      A B C 
+      C B A 
 
 # S7 object / displays nicely
 

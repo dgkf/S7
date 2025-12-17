@@ -15,7 +15,7 @@ new_class(
   validator = NULL
 )
 
-new_object(.parent, ...)
+new_object(...)
 }
 \arguments{
 \item{name}{The name of the class, as a string. The result of calling

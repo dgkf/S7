@@ -483,7 +483,7 @@ test_that("custom getters don't evaulate call objects", {
       as.list(self)[-1]
     })
   ), constructor = function(x) {
-    new_object(substitute(x))
+    new_object(.data = substitute(x))
   })
 
   cl <- QuotedCall(stop("boom"))
@@ -494,7 +494,6 @@ test_that("custom getters don't evaulate call objects", {
 
 
 test_that("custom setters don't evaulate call objects", {
-
   Call :=  new_class(class_call, properties = list(
     name = new_property(
       getter = function(self) {
@@ -522,7 +521,7 @@ test_that("custom setters don't evaulate call objects", {
         out
       })
   ), constructor = function(name, ...) {
-    new_object(as.call(c(as.name(name), ...)))
+    new_object(.data = as.call(c(as.name(name), ...)))
   })
 
   cl <- Call("stop", "boom")
