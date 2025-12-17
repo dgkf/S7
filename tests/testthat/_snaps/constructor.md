@@ -5,7 +5,7 @@
     Output
       function () 
       {
-          new_object(S7_object())
+          new_object()
       }
       <environment: namespace:S7>
     Code
@@ -15,7 +15,7 @@
       {
           x
           y
-          new_object(S7_object(), x = x, y = y)
+          new_object(x = x, y = y)
       }
       <environment: namespace:S7>
     Code
@@ -23,14 +23,14 @@
       new_constructor(foo, list())
     Output
       function (.data = character(0)) 
-      new_object(foo(.data = .data))
+      new_object(.data = .data)
       <environment: 0x0>
     Code
       foo2 <- new_class("foo2", parent = foo)
       new_constructor(foo2, list())
     Output
       function (.data = character(0)) 
-      new_object(foo2(.data = .data))
+      new_object(.data = .data)
       <environment: 0x0>
 
 # can generate constructors for S3 classes
@@ -39,14 +39,13 @@
       new_constructor(class_factor, list())
     Output
       function (.data = integer(), levels = NULL) 
-      new_object(new_factor(.data = .data, levels = levels))
+      new_object(.data = .data, levels = levels)
       <environment: 0x0>
     Code
       new_constructor(class_factor, as_properties(list(x = class_numeric, y = class_numeric)))
     Output
       function (.data = integer(), levels = NULL, x = integer(0), y = integer(0)) 
-      new_object(new_factor(.data = .data, levels = levels), x = x, 
-          y = y)
+      new_object(.data = .data, levels = levels, x = x, y = y)
       <environment: 0x0>
 
 # can generate constructor for inherited abstract classes
@@ -57,7 +56,7 @@
     Output
       function () 
       {
-          new_object(S7_object())
+          new_object()
       }
       <environment: namespace:S7>
     Code
@@ -66,7 +65,7 @@
       function (y = numeric(0)) 
       {
           y
-          new_object(S7_object(), y = y)
+          new_object(y = y)
       }
       <environment: namespace:S7>
 
@@ -76,6 +75,6 @@
       new_constructor(foo, list(y = class_double))
     Output
       function (..., y = numeric(0)) 
-      new_object(foo(...), y = y)
+      new_object(..., y = y)
       <environment: 0x0>
 

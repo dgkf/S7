@@ -15,7 +15,7 @@ new_class(
   validator = NULL
 )
 
-new_object(.parent, ...)
+new_object(...)
 }
 \arguments{
 \item{name}{The name of the class, as a string. The result of calling
@@ -70,8 +70,7 @@ problem, using \verb{@prop_name} to describe where the problem lies.
 See \code{validate()} for more details, examples, and how to temporarily
 suppress validation when needed.}
 
-\item{.parent, ...}{Parent object and named properties used to construct the
-object.}
+\item{...}{Named properties used to construct the object.}
 }
 \value{
 A object constructor, a function that can be used to create objects

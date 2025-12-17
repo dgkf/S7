@@ -59,7 +59,6 @@ test_that("new_method works with both hard and soft dependencies", {
   skip_if(getRversion() < "4.1" && Sys.info()[["sysname"]] == "Windows")
   skip_if(quick_test())
 
-
   on.exit({
     .libPaths(old_libpaths)
     try(detach("package:t2", unload = TRUE), silent = TRUE)
