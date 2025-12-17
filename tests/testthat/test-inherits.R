@@ -22,7 +22,7 @@ test_that("throws informative error", {
   expect_snapshot(check_is_S7("a"), error = TRUE)
 })
 
-test_that("throws informative error", {
+test_that("property defaults and setters can be masked", {
   parent <- new_class(
     "parent",
     properties = list(
@@ -52,10 +52,8 @@ test_that("throws informative error", {
     )
   )
 
-  expect_snapshot(error = TRUE, {
-    foo1 <- new_class("foo1", package = NULL)
-    foo2 <- new_class("foo2", package = NULL)
-    check_is_S7(foo1(), foo2)
-  })
-  expect_snapshot(check_is_S7("a"), error = TRUE)
+  expect_equal(child()@y, 20)
+  expect_equal(child(y = 2)@y, 4)
+  expect_equal(parent()@y, "parent NULL")
+  expect_equal(parent(y = 2)@y, "parent 2")
 })
